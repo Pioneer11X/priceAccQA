@@ -10,6 +10,59 @@ import re
 
 # We need to get the popular subcategories from our DB and for that we need to connect to our db
 
+class Item:
+
+	item_id = ""
+	mspPrice = 0
+	store = ""
+	url = ""
+
+
+	def __init__(self, item_id, mspPrice):
+		self.item_id = item_id
+		self.mspPrice = mspPrice
+		(self.url,self.store) = self.getUrl()
+
+		print(self.mspPrice)
+		print(self.url)
+		print(self.store)
+
+
+	def getUrl(self):
+
+		connection = pymysql.connect(
+			host=keys.mysqlHost,
+			user=keys.mysqlUser,
+			password=keys.mysqlPass,
+			db=keys.mysqlDbName,
+			charset='utf8mb4',
+			cursorclass=pymysql.cursors.DictCursor
+		)
+
+		try:
+			with connection.cursor() as cursor:
+				sql = "select url,store from fashion_lines where item_id = '" + self.item_id + "'"
+				cursor.execute(sql)
+
+				result = cursor.fetchone()
+
+		except:
+			print("Exceptoin when trying to get the store Url for the product.")
+			result = "None"
+		finally:
+			connection.close()
+
+		return (result['url'],result['store'])
+
+	def getStorePrice(self,regex):
+		data = urllib2.urlopen(self.url)
+		dataString = data.read()
+		priceSearchString = regex
+		priceMatches = re.findall(priceSearchString,dataString)
+
+		return priceMatches[0]
+
+
 class StoreQA:
 
 	store = ""
@@ -46,7 +99,7 @@ class StoreQA:
 
 		return self.subcategories
 
-	def getRandomProducts(self):
+	def getProducts(self):
 
 		for subCat in self.subcategories:
 			print(subCat)
@@ -62,14 +115,37 @@ class StoreQA:
 			print(priceMatches)
 			exit()
 
+class StoreRegex:
+
+	priceRegex = {}
+
+	def __init__(self):
+		fp = open("storeRegex.txt",'r')
+		data = fp.readlines()
+		# print(data)
+		noOfLines = data.__len__()
+		for i in range(0,noOfLines):
+			line = data[i]
+			array = line.split(":::")
+			self.priceRegex[array[0]] = array[1]
+
+	def getStoreRegex(self,store):
+		return self.priceRegex[store]
 
 
+kap = StoreRegex()
+print(kap.getStoreRegex("jabong"))
 
 
+trial = Item("52835269",1495)
+print(trial.getStorePrice(kap.getStoreRegex("jabong")))
 
+'''
 test = StoreQA("jabong")
 test.getPopSubCat()
-test.getRandomProducts()
+test.getProducts()
 
 new = StoreQA("flipkart")
 new.getPopSubCat()
+'''
+
