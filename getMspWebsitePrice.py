@@ -23,11 +23,6 @@ class Item:
 		self.mspPrice = mspPrice
 		(self.url,self.store) = self.getUrl()
 
-		print(self.mspPrice)
-		print(self.url)
-		print(self.store)
-
-
 	def getUrl(self):
 
 		connection = pymysql.connect(
@@ -59,8 +54,11 @@ class Item:
 		dataString = data.read()
 		priceSearchString = regex
 		priceMatches = re.findall(priceSearchString,dataString)
-
-		return priceMatches[0]
+		try:
+			return priceMatches[0]
+		except:
+			print (self.url + " is messed up")
+			return 0
 
 
 class StoreQA:
@@ -70,6 +68,7 @@ class StoreQA:
 
 	def __init__(self, store):
 		self.store = store
+		self.getPopSubCat()
 
 	def getPopSubCat(self):
 
@@ -100,7 +99,7 @@ class StoreQA:
 		return self.subcategories
 
 	def getProducts(self):
-
+		itemsList = []
 		for subCat in self.subcategories:
 			print(subCat)
 			url = "http://www.mysmartprice.com/" + subCat['category'] + "/" + subCat['subcategory'] + "?subcategory=" + subCat['subcategory'] + "&property=store:" + self.store
@@ -111,9 +110,19 @@ class StoreQA:
 			priceSearchString = "<div class=\"prdct-item__prc (prdct-item__prc-mdl)*\">\n<span class=\"prdct-item__rpe\">&#8377;</span>\n<span class=\"prdct-item__prc-val\">([\d]*)</span>\n</div>"
 			itemIdMatches = re.findall(itemIdSearchString,dumpString)
 			priceMatches = re.findall(priceSearchString,dumpString)
-			print(itemIdMatches)
-			print(priceMatches)
-			exit()
+			noOfItems = itemIdMatches.__len__()
+			noOfPrices = priceMatches.__len__()
+
+			if noOfItems == noOfPrices:
+				for i in range(0,noOfItems):
+					temp = (itemIdMatches[i],priceMatches[i][1])
+					itemsList.append(temp)
+			else:
+				continue
+			# exit()
+			# return itemsList
+		return itemsList
+
 
 class StoreRegex:
 
@@ -132,7 +141,7 @@ class StoreRegex:
 	def getStoreRegex(self,store):
 		return self.priceRegex[store]
 
-
+'''
 kap = StoreRegex()
 print(kap.getStoreRegex("jabong"))
 
@@ -140,7 +149,7 @@ print(kap.getStoreRegex("jabong"))
 trial = Item("52835269",1495)
 print(trial.getStorePrice(kap.getStoreRegex("jabong")))
 
-'''
+
 test = StoreQA("jabong")
 test.getPopSubCat()
 test.getProducts()
