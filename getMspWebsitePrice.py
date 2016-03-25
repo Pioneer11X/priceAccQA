@@ -5,6 +5,7 @@ import pymysql
 import pymysql.cursors
 import urllib2
 import re
+import json
 
 # first we need to formualte the url
 
@@ -33,19 +34,30 @@ class Item:
 			charset='utf8mb4',
 			cursorclass=pymysql.cursors.DictCursor
 		)
-
 		try:
-			with connection.cursor() as cursor:
-				sql = "select url,store from fashion_lines where item_id = '" + self.item_id + "'"
-				cursor.execute(sql)
-
-				result = cursor.fetchone()
+			#TODO SO, apparently handling data is not as easy as it is in PHP. I need to define my own class and shit now. which can decode the data dump. We use an object of that class to get the url here and we update the cache with an inbuilt method for the class.
+			fp = open("urlCache.json","r")
+			jsonVar = json.load(fp)
+			fp.close()
+			return jsonVar[self.item_id]
 
 		except:
-			print("Exceptoin when trying to get the store Url for the product.")
-			result = "None"
-		finally:
-			connection.close()
+			try:
+				with connection.cursor() as cursor:
+					sql = "select url,store from fashion_lines where item_id = '" + self.item_id + "'"
+					cursor.execute(sql)
+
+					fp = open("urlCache.json","w")
+					result = cursor.fetchone()
+					jsonVar[self.item_id] = result
+					json.dump(fp)
+					fp.close()
+
+			except:
+				print("Exceptoin when trying to get the store Url for the product.")
+				result = "None"
+			finally:
+				connection.close()
 
 		return (result['url'],result['store'])
 
@@ -120,8 +132,8 @@ class StoreQA:
 			else:
 				continue
 			# exit()
-			# return itemsList
-		return itemsList
+			return itemsList
+		# return itemsList
 
 
 class StoreRegex:
