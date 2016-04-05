@@ -1,1 +1,13 @@
 jabong:::<span itemprop="price" content=(.*) class="actual-price">
+amazon:::<span id="priceblock_ourprice".*>.*</span>(.*)</span>
+flipkart:::<span class="selling-price omniture-field" data-omnifield="eVar48" data-eVar48="(.*)">
+shopclues:::Deal Price:</label>Rs.(.*)</div>
+yepme:::<span itemprop="price" content="([\d]*)\.00"><\/span>
+babyoye:::<input type="hidden" id="product_price" name="product_price" value="(.*)"\/>
+trendin:::'sellingPrice': (.*),[\s]*'dimension8': [\d]*,
+fabfurnish:::<meta content="([\d]*)" itemprop="price">
+zivame:::"gtm_productprice" : "([\d]*).0000",
+fashionara:::"price":([\d]*)
+zansaar:::<span itemprop="price">(.*)<\/span>
+pepperfry:::itemData\.price = '([\d]*).0000'
+koovs:::<span itemprop="price">(.*)<\/span>
