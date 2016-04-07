@@ -21,7 +21,7 @@ class Check:
         logFile = open( keys.docRoot + store + ".log","w")
         messedUpFile = open( keys.docRoot + "messedUpCache/" + store + ".cache", 'w')
 
-        print(store)
+        # print(store)
 
         TotalTime = {
             "StoreQAInit":0,
@@ -96,7 +96,7 @@ class Check:
             # print("Item Initialiser : %s Seconds"%timeTaken)
             TotalTime['ItemInit'] += timeTaken
 
-            tempUrl = cacheVariable.getUrl(item.item_id)
+            tempUrl = cacheVariable.getUrl(item.item_id).encode('utf-8')
             item.setUrl(tempUrl)
             logFile.write(tempUrl + "\n")
 
@@ -122,6 +122,9 @@ class Check:
             elif storePrice!=0:
                 wrong+=1
                 counted+=1
+            '''elif storePrice == 0:
+                print(tempUrl + "---" + storeRegex.getStoreRegex(store))
+                exit()'''
             '''except:
                 print(Exception.__class__)
                 print("Number of Producst checked: " + str(i))
@@ -146,6 +149,7 @@ def run():
         exit("Usage : python %s <StoreName>" % sys.argv[0])
     else:
         store = sys.argv[1]
+        print(store)
         if store not in stores:
             # print("Please enter a valid store")
             exit("Please enter a valid store.. Entered store: " + store)

@@ -43,7 +43,9 @@ class Cache:
                     # print(self.dataDict)
 
                     fp = open(keys.docRoot + "urlCaches/" + self.store + ".cache", 'a')
-                    temp = str(item_id) + ":::" + self.dataDict[item_id] + "\n"
+                    temp = item_id + ":::" + self.dataDict[item_id] + "\n"
+                    temp = temp.encode('utf-8')
+                    print(temp)
                     fp.write(temp)
                     fp.close()
                 connection.close()
