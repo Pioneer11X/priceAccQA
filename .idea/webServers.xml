@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="3de03b76-ce65-4f5b-9faf-18deaf334020" name="Sravan Server Work" url="http://sravan.mysmartprice.com">
+        <fileTransfer host="sravan.mysmartprice.com" port="22" privateKey="$USER_HOME$/.ssh/id_rsa" rootFolder="/home/ubuntu/priceAccQA" accessType="SFTP" passphrase="dfc1dfc5dfcedfc3df9bdf98df99df9e" username="root" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

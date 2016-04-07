@@ -32,7 +32,7 @@ class Item:
 			priceSearchString = regex
 			priceMatches = re.findall(priceSearchString,dataString)
 		except ( urllib2.HTTPError, urllib2.URLError, urllib2.httplib.IncompleteRead ) as e:
-			print(e.message)
+			print(e)
 		try:
 			return priceMatches[0]
 		except:
