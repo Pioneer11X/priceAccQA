@@ -6,31 +6,29 @@ import keys
 
 # amazon jabong flipkart shopclues babyoye bewakoof yepme zansaar koovs zivame fashionara fabfurnish snapdeal trendin pepperfry
 
-stores = ['shopclues', 'amazon', 'jabong', 'flipkart', 'yepme', 'babyoye', 'bewakoof', 'zansaar', 'koovs', 'zivame', 'fashionara', 'fabfurnish', 'trendin', 'snapdeal', 'pepperfry']
-
+stores = ['shopclues', 'amazon', 'jabong', 'flipkart', 'yepme', 'babyoye', 'bewakoof', 'zansaar', 'koovs', 'zivame',
+          'fashionara', 'fabfurnish', 'trendin', 'snapdeal', 'pepperfry']
 
 
 class Check:
-
     def __init__(self, store):
         self.store = store
 
-    def accCheck(self):
+    def accCheck(self, debugFile=None):
         store = self.store
-        percentage = 0.00
-        logFile = open( keys.docRoot + store + ".log","w")
-        messedUpFile = open( keys.docRoot + "messedUpCache/" + store + ".cache", 'w')
+        logFile = open(keys.docRoot + "runLogs/" + store + ".log", "w")
+        messedUpFile = open(keys.docRoot + "messedUpCache/" + store + ".cache", 'w')
 
         # print(store)
 
         TotalTime = {
-            "StoreQAInit":0,
-            "CacheInit":0,
-            "StoreRegexInit":0,
-            "GetProducts":0,
-            "ItemInit":0,
-            "ItemUrlGrab":0,
-            "ItemGetStorePrice":0,
+            "StoreQAInit": 0,
+            "CacheInit": 0,
+            "StoreRegexInit": 0,
+            "GetProducts": 0,
+            "ItemInit": 0,
+            "ItemUrlGrab": 0,
+            "ItemGetStorePrice": 0,
 
         }
 
@@ -43,7 +41,6 @@ class Check:
         startTime = tempTime
         # print("StoreRegex Initialiser : %s Seconds"%timeTaken)
         TotalTime['StoreRegexInit'] += timeTaken
-
 
         storeQA = getMspWebsitePrice.StoreQA(store)
 
@@ -60,8 +57,6 @@ class Check:
         startTime = tempTime
         # print("Cache Initialiser : %s Seconds"%timeTaken)
         TotalTime['CacheInit'] += timeTaken
-
-
 
         # Now, we get the products for the first popular subcategory.
 
@@ -88,7 +83,7 @@ class Check:
             # try:
             startTime = time.time()
 
-            item = getMspWebsitePrice.Item(products[i][0],products[i][1])
+            item = getMspWebsitePrice.Item(products[i][0], products[i][1])
 
             tempTime = time.time()
             timeTaken = tempTime - startTime
@@ -96,7 +91,7 @@ class Check:
             # print("Item Initialiser : %s Seconds"%timeTaken)
             TotalTime['ItemInit'] += timeTaken
 
-            tempUrl = cacheVariable.getUrl(item.item_id).encode('utf-8')
+            tempUrl = (cacheVariable.getUrl(item.item_id)).encode('utf-8')
             item.setUrl(tempUrl)
             logFile.write(tempUrl + "\n")
 
@@ -117,11 +112,21 @@ class Check:
 
             # print "StorePrice : " + storePrice + " MSPPrice: " + mspPrice
             if storePrice == mspPrice:
-                correct+=1
-                counted+=1
-            elif storePrice!=0:
-                wrong+=1
-                counted+=1
+                correct += 1
+                counted += 1
+            elif storePrice != 0:
+                # Debug Block
+
+                if debugFile != None:
+                    debugFp = open(debugFile, mode='a')
+                    if debugFp:
+                        debugString = tempUrl.rstrip('\n') + "::" + "Store Price: " + str(storePrice) + " mspPrice: " + str(mspPrice)
+                        debugFp.write(debugString)
+                        debugFp.close()
+
+                wrong += 1
+                counted += 1
+                # exit()
             '''elif storePrice == 0:
                 print(tempUrl + "---" + storeRegex.getStoreRegex(store))
                 exit()'''
@@ -134,27 +139,40 @@ class Check:
             '''
 
         if counted != 0:
-            percentage = (float(correct)/float(counted)) * 100
+            percentage = (float(correct) / float(counted)) * 100
         else:
             percentage = None
         # TODO SO, we need to change how the percentae is calculated. In case of an exception, we currently calculate the wrong percentage( The denominator must be Number of Products Checked rather than noOfTotalProducts. Fix that.
-        print (str(percentage) + " is the accuracy for " + store)
-        print("Total: %d\nChecked: %d\nCorrect: %d\nWrong: %d"%(noOfProducts, counted, correct, wrong))
+        print(str(percentage) + " is the accuracy for " + store)
+        print("Total: %d\nChecked: %d\nCorrect: %d\nWrong: %d" % (noOfProducts, counted, correct, wrong))
         # print(TotalTime)
         logFile.close()
 
 
 def run():
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         exit("Usage : python %s <StoreName>" % sys.argv[0])
-    else:
+    elif len(sys.argv) == 3:
+        debugFile = sys.argv[2]
+        store = sys.argv[1]
+        print(debugFile)
+        print(store)
+        if store not in stores:
+            # print("Please enter a valid store")
+            exit("Please enter a valid store.. Entered store: " + store)
+        test = Check(store)
+        test.accCheck(debugFile)
+
+    elif len(sys.argv) == 2:
         store = sys.argv[1]
         print(store)
         if store not in stores:
             # print("Please enter a valid store")
             exit("Please enter a valid store.. Entered store: " + store)
+        test = Check(store)
+        test.accCheck()
+    else:
+        exit("Usage : python %s <StoreName>" % sys.argv[0])
 
-    test = Check(store)
-    test.accCheck()
 
 run()

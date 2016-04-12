@@ -45,11 +45,12 @@ class Cache:
                     fp = open(keys.docRoot + "urlCaches/" + self.store + ".cache", 'a')
                     temp = item_id + ":::" + self.dataDict[item_id] + "\n"
                     temp = temp.encode('utf-8')
-                    print(temp)
+                    # print(temp)
                     fp.write(temp)
                     fp.close()
                 connection.close()
+                return self.dataDict[item_id]
             except pymysql.err.OperationalError as e:
                 print("Exceptoin when trying to get the store Url for the product. Message: " + str(e))
                 result = "None"
-            return self.dataDict[item_id]
+                return None
