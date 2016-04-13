@@ -17,29 +17,47 @@ class Item:
 	mspPrice = 0
 	store = ""
 
-
-	def __init__(self, item_id, mspPrice):
+	def __init__(self, item_id, mspPrice, store):
 		self.item_id = item_id
-		self.mspPrice = mspPrice
+		self.mspPrice = int(mspPrice)
+		self.store = store
 
 	def setUrl(self, url):
 		self.url = url
 
-	def getStorePrice(self,regex, logFile):
+	def getStorePrice(self, regex, logFile, exceptLogFile):
+
 		try:
 			data = urllib2.urlopen(self.url)
 			dataString = data.read()
 			priceSearchString = regex
 			priceMatches = re.findall(priceSearchString,dataString)
+
+
 		except ( urllib2.HTTPError, urllib2.URLError, urllib2.httplib.IncompleteRead ) as e:
-			print(e)
+			# print(e)
+			exceptLogFile.write(self.url)
+			exceptLogFile.write(str(e))
 		try:
-			return priceMatches[0]
+			retval = priceMatches[0]
 		except:
 			# print (self.url + " is messed up")
 			logFile.write(self.url + " is messed up\n")
 			# print(priceMatches)
 			return 0
+
+			# TODO We need to clean the price obtained. We can copy the iCrawler Regex here I guess.
+
+			# Remove the comma
+			# retVal = retVal.replace(",","")
+		retVal = priceMatches[0].replace(",","")
+		retVal = re.sub('/[^0-9.]+/','',retVal)
+		retVal = retVal.split(".",1)
+		retVal = retVal[0]
+		retVal = int(retVal)
+		# print(retVal)
+		return retVal
+			#return priceMatches[0]
 
 
 
@@ -64,7 +82,7 @@ class StoreQA:
 			self.subcategories.append(temp)
 		return self.subcategories
 
-	def getProducts(self, logFile):
+	def getProducts(self, logFile, exceptLogFile):
 		itemsList = []
 		for subCat in self.subcategories:
 			# print(subCat)
@@ -74,7 +92,9 @@ class StoreQA:
 			try:
 				dump = urllib2.urlopen(url)
 			except ( urllib2.HTTPError, urllib2.URLError, urllib2.httplib.IncompleteRead ) as e:
-				print(e)
+				# print(e)
+				exceptLogFile.write(str(e))
+				continue
 			dumpString = dump.read()
 			itemIdSearchString = "prdct-item prdct-item--nc\" data-mspid=\"([\d]*)\""
 			priceSearchString = "<div class=\"prdct-item__prc (prdct-item__prc-mdl)*\">\n<span class=\"prdct-item__rpe\">&#8377;</span>\n<span class=\"prdct-item__prc-val\">([\d]*)</span>\n</div>"

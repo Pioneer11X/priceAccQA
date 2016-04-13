@@ -15,6 +15,7 @@ for store in stores:
 
     logFile = open(store + ".log","w")
     messedUpFile = open("messedUpCache/" + store + ".cache", 'w')
+    exceptLogFile = open(keys.docRoot + "exceptLogs/" + store + ".log", 'w')
 
     print(store)
 
@@ -60,7 +61,7 @@ for store in stores:
 
     # Now, we get the products for the first popular subcategory.
 
-    products = storeQA.getProducts(logFile)
+    products = storeQA.getProducts(logFile, exceptLogFile)
 
     tempTime = time.time()
     timeTaken = tempTime - startTime
