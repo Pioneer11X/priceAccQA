@@ -17,16 +17,15 @@ class Item:
 	mspPrice = 0
 	store = ""
 
-	def __init__(self, item_id, mspPrice):
+	def __init__(self, item_id, mspPrice, store):
 		self.item_id = item_id
 		self.mspPrice = int(mspPrice)
+		self.store = store
 
 	def setUrl(self, url):
 		self.url = url
 
-	def getStorePrice(self, regex, logFile):
-
-		messedUpFile = open(keys.docRoot + "exceptLogs/" + self.store + ".log", 'w')
+	def getStorePrice(self, regex, logFile, exceptLogFile):
 
 		try:
 			data = urllib2.urlopen(self.url)
@@ -37,7 +36,8 @@ class Item:
 
 		except ( urllib2.HTTPError, urllib2.URLError, urllib2.httplib.IncompleteRead ) as e:
 			# print(e)
-			messedUpFile.write(self.store + e)
+			exceptLogFile.write(self.url)
+			exceptLogFile.write(str(e))
 		try:
 			retval = priceMatches[0]
 		except:
@@ -82,7 +82,7 @@ class StoreQA:
 			self.subcategories.append(temp)
 		return self.subcategories
 
-	def getProducts(self, logFile):
+	def getProducts(self, logFile, exceptLogFile):
 		itemsList = []
 		for subCat in self.subcategories:
 			# print(subCat)
@@ -92,7 +92,9 @@ class StoreQA:
 			try:
 				dump = urllib2.urlopen(url)
 			except ( urllib2.HTTPError, urllib2.URLError, urllib2.httplib.IncompleteRead ) as e:
-				print(e)
+				# print(e)
+				exceptLogFile.write(str(e))
+				continue
 			dumpString = dump.read()
 			itemIdSearchString = "prdct-item prdct-item--nc\" data-mspid=\"([\d]*)\""
 			priceSearchString = "<div class=\"prdct-item__prc (prdct-item__prc-mdl)*\">\n<span class=\"prdct-item__rpe\">&#8377;</span>\n<span class=\"prdct-item__prc-val\">([\d]*)</span>\n</div>"

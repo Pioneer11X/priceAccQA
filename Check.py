@@ -18,6 +18,7 @@ class Check:
         store = self.store
         logFile = open(keys.docRoot + "runLogs/" + store + ".log", "w")
         messedUpFile = open(keys.docRoot + "messedUpCache/" + store + ".cache", 'w')
+        exceptLogFile = open(keys.docRoot + "exceptLogs/" + store + ".log", 'w')
 
         # print(store)
 
@@ -60,7 +61,7 @@ class Check:
 
         # Now, we get the products for the first popular subcategory.
 
-        products = storeQA.getProducts(logFile)
+        products = storeQA.getProducts(logFile, exceptLogFile)
 
         tempTime = time.time()
         timeTaken = tempTime - startTime
@@ -83,7 +84,7 @@ class Check:
             # try:
             startTime = time.time()
 
-            item = getMspWebsitePrice.Item(products[i][0], products[i][1])
+            item = getMspWebsitePrice.Item(products[i][0], products[i][1], self.store)
 
             tempTime = time.time()
             timeTaken = tempTime - startTime
@@ -91,7 +92,11 @@ class Check:
             # print("Item Initialiser : %s Seconds"%timeTaken)
             TotalTime['ItemInit'] += timeTaken
 
-            tempUrl = (cacheVariable.getUrl(item.item_id)).encode('utf-8')
+            tempUrl = (cacheVariable.getUrl(item.item_id))
+            if ( tempUrl == None ):
+                exceptLogFile.write("Exception when trying to get the Url for item Id %s" % item.item_id)
+                continue
+            tempUrl = tempUrl.encode('utf-8')
             item.setUrl(tempUrl)
             logFile.write(tempUrl + "\n")
 
@@ -102,7 +107,7 @@ class Check:
             TotalTime['ItemUrlGrab'] += timeTaken
 
             mspPrice = item.mspPrice
-            storePrice = item.getStorePrice(storeRegex.getStoreRegex(store), messedUpFile)
+            storePrice = item.getStorePrice(storeRegex.getStoreRegex(store), messedUpFile, exceptLogFile)
 
             tempTime = time.time()
             timeTaken = tempTime - startTime
@@ -165,7 +170,7 @@ def run():
 
     elif len(sys.argv) == 2:
         store = sys.argv[1]
-        print(store)
+        print("\n" + store + " : ")
         if store not in stores:
             # print("Please enter a valid store")
             exit("Please enter a valid store.. Entered store: " + store)
